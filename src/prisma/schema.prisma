@@ -1,0 +1,198 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum EstadoOrden {
+  CREADO
+  CANCELADO
+  EN_PROCESO
+  EN_CAMINO
+  ENTREGADO
+}
+
+enum EstadoPago {
+  PENDIENTE
+  PAGADO
+  CANCELADO
+}
+
+enum TipoDescuento {
+  PORCENTAJE
+  MONTO_FIJO
+}
+
+enum TipoDescuentoObjetivo {
+  TOTAL_ORDEN
+  PAQUETE
+}
+
+model Rol {
+  id        Int       @id @default(autoincrement())
+  nombre    String    @unique
+  createdAt DateTime  @default(now()) @map("created_at")
+  usuarios  Usuario[]
+
+  @@map("ROLES")
+}
+
+model Usuario {
+  id             Int      @id @default(autoincrement())
+  username       String   @unique
+  hashedPassword String   @map("hashed_password")
+  email          String   @unique
+  activo         Boolean  @default(true)
+  rolId          Int?
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
+  ordenes        Orden[]
+  rol            Rol?     @relation(fields: [rolId], references: [id])
+
+  // 👇 Se agrega la relación inversa con CupoReservado
+  cuposReservados CupoReservado[]
+
+  @@map("USUARIOS")
+}
+
+model Paquete {
+  id          Int      @id @default(autoincrement())
+  nombre      String   @unique
+  descripcion String?
+  precio      Decimal  @db.Decimal(10, 2)
+  stock       Int?     @map("sotck_paquete")
+  foto        String
+  createdAt   DateTime @default(now()) @map("created_at")
+  activo      Boolean  @default(true)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+
+  fechaInicio     DateTime? @map("fecha_inicio") // Inicio del paquete
+  fechaFin        DateTime? @map("fecha_fin") // Fin del paquete
+  diasDisponibles Json      @default("[]") @map("dias_disponibles") // Días disponibles en JSON (ej. ["LUNES", "MARTES"])
+  cuposDiarios    Int       @default(6) @map("cupos_diarios") // Máximo de cupos por día
+
+  descuentos      Descuento[]
+  ordenes         OrdenPaquete[]
+  cuposReservados CupoReservado[]
+
+  @@map("PAQUETES")
+}
+
+enum EstadoReserva {
+  PENDIENTE
+  RESERVADO
+}
+
+model CupoReservado {
+  id        Int           @id @default(autoincrement())
+  paqueteId Int           @map("paquete_id")
+  usuarioId Int           @map("usuario_id")
+  fecha     DateTime      @map("fecha")
+  estado    EstadoReserva @default(PENDIENTE) @map("estado")
+  createdAt DateTime      @default(now()) @map("created_at")
+
+  paquete      Paquete        @relation(fields: [paqueteId], references: [id])
+  usuario      Usuario        @relation(fields: [usuarioId], references: [id]) // Relación con Usuario
+  OrdenPaquete OrdenPaquete[]
+
+  @@map("CUPO_RESERVADO")
+}
+
+model Orden {
+  id               Int         @id @default(autoincrement())
+  usuarioId        Int         @map("usuario_id")
+  fecha            DateTime    @default(now()) @map("fecha")
+  subtotal         Decimal     @db.Decimal(10, 2)
+  descuentoTotal   Decimal     @default(0) @map("descuento_total") @db.Decimal(10, 2)
+  total            Decimal     @db.Decimal(10, 2)
+  estado           EstadoOrden @default(CREADO)
+  direccionEnvio   String?     @map("direccion_envio")
+  telefonoContacto String?     @map("telefono_contacto")
+  metodoPago       String?     @default("WEBPAY") @map("metodo_pago")
+  notas            String?
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @default(now()) @updatedAt @map("updated_at")
+
+  usuario       Usuario          @relation(fields: [usuarioId], references: [id])
+  transacciones Transbank[]
+  descuentos    OrdenDescuento[]
+  paquetes      OrdenPaquete[]
+
+  @@map("ORDENES")
+}
+
+model OrdenPaquete {
+  id             Int      @id @default(autoincrement())
+  ordenId        Int      @map("orden_id")
+  paqueteId      Int      @map("paquete_id")
+  cantidad       Int      @default(1)
+  precioUnitario Decimal  @map("precio_unitario") @db.Decimal(10, 2)
+  total          Decimal  @db.Decimal(10, 2)
+  reservaId      Int?     @map("reserva_id") // 🔹 ID de la reserva creada
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  orden   Orden          @relation(fields: [ordenId], references: [id])
+  paquete Paquete        @relation(fields: [paqueteId], references: [id])
+  reserva CupoReservado? @relation(fields: [reservaId], references: [id])
+
+  @@map("ORDEN_PAQUETES")
+}
+
+model Descuento {
+  id             Int              @id @default(autoincrement())
+  codigo         String           @unique
+  tipo           TipoDescuento
+  valor          Decimal          @db.Decimal(10, 2)
+  montoMinimo    Decimal?         @map("monto_minimo") @db.Decimal(10, 2)
+  usoMaximo      Int              @map("uso_maximo")
+  usoActual      Int              @default(0) @map("uso_actual")
+  topeMaximo     Decimal?         @map("tope_maximo") @db.Decimal(10, 2)
+  paqueteId      Int?             @map("paquete_id")
+  fechaInicio    DateTime         @map("fecha_inicio")
+  fechaFin       DateTime         @map("fecha_fin")
+  activo         Boolean          @default(true)
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @default(now()) @updatedAt @map("updated_at")
+  paquete        Paquete?         @relation(fields: [paqueteId], references: [id])
+  OrdenDescuento OrdenDescuento[]
+
+  @@map("DESCUENTOS")
+}
+
+model OrdenDescuento {
+  id              Int                   @id @default(autoincrement())
+  ordenId         Int                   @map("orden_id")
+  descuentoId     Int                   @map("descuento_id")
+  tipo            TipoDescuento
+  montoAplicado   Decimal               @map("monto_aplicado") @db.Decimal(10, 2)
+  objetivo        TipoDescuentoObjetivo
+  paqueteId       Int?                  @map("paquete_id")
+  fechaAplicacion DateTime              @default(now()) @map("fecha_aplicacion")
+
+  orden     Orden     @relation(fields: [ordenId], references: [id])
+  descuento Descuento @relation(fields: [descuentoId], references: [id])
+
+  @@map("ORDEN_DESCUENTOS")
+}
+
+model Transbank {
+  id                 Int        @id @default(autoincrement())
+  fecha              DateTime   @default(now()) @map("fecha")
+  sessionId          String     @map("session_id")
+  token              String     @unique
+  ordenId            Int        @map("orden_id")
+  responseCode       String?
+  authorizationCode  String?
+  paymentTypeCode    String?
+  installmentsNumber Int?       @map("installments_number")
+  installmentsAmount Decimal?   @map("installments_amount") @db.Decimal(10, 2)
+  cardNumber         String?    @map("card_number")
+  estadoPago         EstadoPago @default(PENDIENTE) @map("estado_pago")
+  total              Decimal    @db.Decimal(10, 2)
+  orden              Orden      @relation(fields: [ordenId], references: [id])
+
+  @@map("TRANSBANK")
+}
