@@ -3,7 +3,7 @@ import { MONGO_URI } from '../config.js';
 
 export const connectMongoDB = async () => {
   try {
-    const mongoUri =  'mongodb+srv://matmolinas:ILA572bXVnhjowIS@cluster0.ca16u.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+    const mongoUri =  MONGO_URI || 'mongodb://localhost:27017/mvimerzion_bd';
     await mongoose.connect(mongoUri);
   } catch (error) {
     console.error('Error connecting to MongoDB:', error.message);
