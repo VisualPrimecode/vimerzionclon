@@ -33,6 +33,7 @@ export class UserRepository  {
           hashedPassword: userData.hashed_password,
           email: userData.email,
           rolId: rol.id,
+          puntos: userData.puntos ?? 0, // 👈 Aquí
         },
       });
       return newUser;
@@ -51,7 +52,10 @@ export class UserRepository  {
       if (userData.email) updateData.email = userData.email;
       if (userData.hashedPassword) updateData.hashedPassword = userData.hashedPassword;
       if (userData.direccion) updateData.direccion = userData.direccion;
-      
+      if (typeof userData.puntos === 'number') {
+  updateData.puntos = userData.puntos;
+}
+
       // Si se proporciona un rol, buscar su ID
       if (userData.rol) {
         const rol = await prisma.rol.findUnique({

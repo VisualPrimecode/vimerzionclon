@@ -28,6 +28,8 @@ export class UserService{
         email: parsedUser.email,
         hashed_password: hashedPassword,
         rol: parsedUser.nombreRol,
+        puntos: parsedUser.puntos ?? 0, // 👈 incluye esto si permites setear puntos al registrar
+
       };
       // Crear el usuario en el repositorio
       const createdUser = await this.UserRepository.create(userForRepo);
