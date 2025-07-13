@@ -41,19 +41,21 @@ model Rol {
 }
 
 model Usuario {
-  id              Int              @id @default(autoincrement())
-  username        String           @unique
-  hashedPassword  String           @map("hashed_password")
-  email           String           @unique
-  activo          Boolean          @default(true)
-  rolId           Int?
-  createdAt       DateTime         @default(now()) @map("created_at")
-  updatedAt       DateTime         @default(now()) @updatedAt @map("updated_at")
-  ordenes         Orden[]
-  rol             Rol?             @relation(fields: [rolId], references: [id])
-  cuposReservados CupoReservado[]
+  id             Int      @id @default(autoincrement())
+  username       String   @unique
+  hashedPassword String   @map("hashed_password")
+  email          String   @unique
+  activo         Boolean  @default(true)
+  rolId          Int?
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
+  ordenes        Orden[]
+  rol            Rol?     @relation(fields: [rolId], references: [id])
+  puntos          Int      @default(0) // 👈 Agrega esto
 
-  puntos          Int              @default(0) // 👈 Campo agregado para puntos
+
+  // 👇 Se agrega la relación inversa con CupoReservado
+  cuposReservados CupoReservado[]
 
   @@map("USUARIOS")
 }

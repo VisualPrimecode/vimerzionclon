@@ -29,8 +29,9 @@ export async function loginUser(req, res) {
       user: {
         email: user.email,
         id: user.id, // opcional
-        name: user.name, // opcional si lo tienes
+        username: user.username, // opcional si lo tienes
         role: user.role, // opcional si lo tienes
+        puntos: user.puntos, // opcional si lo tienes
       }
     });
 

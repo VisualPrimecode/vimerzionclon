@@ -48,15 +48,11 @@ export class UserService{
   
       // Validación de password si viene en la actualización
       let dataToUpdate = { ...userData };
-      if (userData.password !== undefined) {
-        if (!userData.password.trim()) {
-          throw new Error("La contraseña no puede estar vacía");
-        }
-        // Solo hashear si hay una nueva contraseña
-        dataToUpdate.hashedPassword  = await hashPassword(userData.password);
-        // Eliminar la password original del objeto de actualización
-        delete dataToUpdate.password;
-      }
+      if (typeof userData.password === 'string' && userData.password.trim()) {
+  dataToUpdate.hashedPassword = await hashPassword(userData.password);
+}
+delete dataToUpdate.password;
+
   
       // Si se intenta actualizar el rol, validar que sea válido
       if (dataToUpdate.nombreRol && !['CLIENTE', 'ADMINISTRADOR'].includes(dataToUpdate.nombreRol)) {

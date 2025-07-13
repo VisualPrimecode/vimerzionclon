@@ -17,6 +17,8 @@ async login(email, password) {
     id: user.id,
     email: user.email,
     role: user.rol.nombre,
+    puntos: user.puntos,
+    username: user.username, 
   });
 
   // Retornar tanto el token como algunos datos del usuario
@@ -25,8 +27,9 @@ async login(email, password) {
     user: {
       id: user.id,
       email: user.email,
-      nombre: user.nombre, // o como se llame el campo
-      role: user.rol.nombre
+      username: user.username, // o como se llame el campo
+      role: user.rol.nombre,
+      puntos: user.puntos, // si tienes este campo
     }
   };
 }
