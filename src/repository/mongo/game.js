@@ -38,23 +38,23 @@ export const GameRepository = {
       { $skip: skip },
       { $limit: limit },
     ];
-    console.log("📦 Pipeline de agregación principal:", JSON.stringify(pipeline, null, 2));
+    //console.log("📦 Pipeline de agregación principal:", JSON.stringify(pipeline, null, 2));
   
     const totalPipeline = [
       { $match: matchQuery },
       { $group: { _id: "$_id" } },
       { $count: "total" },
     ];
-    console.log("📦 Pipeline de agregación total:", JSON.stringify(totalPipeline, null, 2));
+   // console.log("📦 Pipeline de agregación total:", JSON.stringify(totalPipeline, null, 2));
   
     const [games, totalResult] = await Promise.all([
       Game.aggregate(pipeline),
       Game.aggregate(totalPipeline),
     ]);
   
-    console.log("✅ Resultados obtenidos:");
-    console.log("🎮 Games:", games);
-    console.log("📈 Total result:", totalResult);
+    //console.log("✅ Resultados obtenidos:");
+    //console.log("🎮 Games:", games);
+    //console.log("📈 Total result:", totalResult);
   
     const total = totalResult.length > 0 ? totalResult[0].total : 0;
   

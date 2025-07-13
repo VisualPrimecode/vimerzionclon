@@ -51,7 +51,7 @@ model Usuario {
   updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
   ordenes        Orden[]
   rol            Rol?     @relation(fields: [rolId], references: [id])
-  puntos          Int      @default(0) // 👈 Agrega esto
+  puntos          Int?      @default(0) // 👈 Agrega esto
 
 
   // 👇 Se agrega la relación inversa con CupoReservado
