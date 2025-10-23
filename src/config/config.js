@@ -23,8 +23,7 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 const EMAIL_USER= process.env.EMAIL_USER;
 const EMAIL_DEST = process.env.EMAIL_DEST;
 const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD
-const FRONTEND_URL =
-  NODE_ENV === 'production' ? process.env.FRONTEND_URL : 'http://localhost:4200';
+const FRONTEND_URL = 'https://vimerzion.com';
 
   export { PORT, JWT_SECRET, FIREBASE_STORAGE_BUCKET, NODE_ENV, FRONTEND_URL,
     API_KEY,COMMERCE_CODE,WEBPAY_ENV,MONGO_URI,EMAIL_USER,EMAIL_DEST,EMAIL_PASSWORD
